@@ -1,5 +1,8 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+use anchor_spl::{
+    associated_token::AssociatedToken, 
+    token::{self, Mint, Token, TokenAccount, Transfer},
+};
 
 use crate::state::Campaign;
 use crate::error::CampaignError;
@@ -59,19 +62,14 @@ pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(
-        mut, // May need mut if we decide to close it later
-        seeds = [b"campaign".as_ref(), campaign.creator.as_ref(), campaign.name.as_bytes()],
-        bump = campaign.bump,
-        has_one = creator @ CampaignError::Unauthorized, // Ensure signer is the creator
-        has_one = mint @ CampaignError::InvalidMint // Ensure correct mint associated with campaign data
-    )]
+    #[account(mut)] // Campaign account needs to be mutable to update amount_donated
     pub campaign: Account<'info, Campaign>,
 
     #[account(
-        mut,
-        token::mint = mint, // Use the mint passed in constraints/context
-        token::authority = campaign, // PDA is the authority
+        init_if_needed,
+        payer = creator,
+        associated_token::mint = mint, // Use associated_token::mint
+        associated_token::authority = campaign, // Authority is the campaign PDA
         token::token_program = token_program,
     )]
     pub campaign_token_account: Account<'info, TokenAccount>,
@@ -80,17 +78,19 @@ pub struct Withdraw<'info> {
     pub creator: Signer<'info>, // Must be the campaign creator
 
     #[account(
-        mut,
-        token::mint = mint, // Creator's token account for the same mint
-        token::authority = creator,
+        init_if_needed,
+        payer = creator,
+        associated_token::mint = mint, // Use associated_token::mint
+        associated_token::authority = creator, // Authority is the campaign PDA
         token::token_program = token_program,
     )]
     pub creator_token_account: Account<'info, TokenAccount>,
 
     // campaign.has_one = mint constraint ensures this mint matches the one in campaign
     pub mint: Account<'info, Mint>, 
-
+    pub associated_token_program: Program<'info, AssociatedToken>, // Add AssociatedToken program
+    pub rent: Sysvar<'info, Rent>, // Rent might not be needed if using init_if_needed with ATAs
     pub token_program: Program<'info, Token>,
     // system_program might be needed if closing accounts
-    // pub system_program: Program<'info, System>,
+    pub system_program: Program<'info, System>,
 } 

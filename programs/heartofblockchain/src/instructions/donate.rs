@@ -1,7 +1,11 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
+use anchor_spl::{
+    associated_token::AssociatedToken, 
+    token::{self, Mint, Token, TokenAccount, Transfer},
+};
 use crate::state::Campaign;
 use crate::error::CampaignError;
+
 
 pub fn donate(ctx: Context<Donate>, amount: u64) -> Result<()> {
     require!(amount > 0, CampaignError::DonationAmountMustBePositive);
@@ -41,21 +45,15 @@ pub fn donate(ctx: Context<Donate>, amount: u64) -> Result<()> {
 
 #[derive(Accounts)]
 pub struct Donate<'info> {
-    #[account(
-        mut,
-        seeds = [b"campaign".as_ref(), campaign.creator.as_ref(), campaign.name.as_bytes()],
-        bump = campaign.bump, // Use stored bump
-        has_one = mint @ CampaignError::InvalidMint // Constraint to ensure correct mint
-    )]
+    #[account(mut)] // Campaign account needs to be mutable to update amount_donated
     pub campaign: Account<'info, Campaign>,
 
     #[account(
-        mut,
-        // Use constraint matching the campaign's mint field directly
-        token::mint = mint,
-        // PDA is the authority, address derived from seeds
-        token::authority = campaign,
-        token::token_program = token_program, // Specify token program
+        init_if_needed,
+        payer = donor,
+        associated_token::mint = mint, // Use associated_token::mint
+        associated_token::authority = campaign, // Authority is the campaign PDA
+        token::token_program = token_program,
     )]
     pub campaign_token_account: Account<'info, TokenAccount>,
 
@@ -63,16 +61,26 @@ pub struct Donate<'info> {
     pub donor: Signer<'info>,
 
     #[account(
-        mut,
-        // Ensure donor's token account is for the correct mint and owned by the donor
-        token::mint = mint,
-        token::authority = donor,
-        token::token_program = token_program, // Specify token program
+        // Use associated_token constraints for donor's ATA as well for consistency
+        // Although init_if_needed might be handled by the client, it's good practice
+        init_if_needed,
+        payer = donor,
+        associated_token::mint = mint,
+        associated_token::authority = donor,
+        token::token_program = token_program,
     )]
-    pub donor_token_account: Account<'info, TokenAccount>,
+    pub donor_token_account: Account<'info, TokenAccount>, // Should be mut if it needs creation
 
+    #[account(
+        // Ensure the mint account provided matches the one stored in the campaign
+        // This constraint assumes campaign account has a field `token_mint: Pubkey`
+        // If not, this constraint needs adjustment or removal if mint check is done differently
+        // constraint = mint.key() == campaign.token_mint @ CampaignError::InvalidMint
+    )]
     pub mint: Account<'info, Mint>,
 
     pub token_program: Program<'info, Token>,
-    pub system_program: Program<'info, System>, 
-} 
+    pub associated_token_program: Program<'info, AssociatedToken>, // Add AssociatedToken program
+    pub system_program: Program<'info, System>,
+    pub rent: Sysvar<'info, Rent>, // Rent might not be needed if using init_if_needed with ATAs
+}

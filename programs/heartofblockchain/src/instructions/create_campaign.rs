@@ -1,7 +1,10 @@
 use anchor_lang::prelude::*;
 use crate::state::Campaign;
 use crate::error::CampaignError;
-use anchor_spl::token::{TokenAccount, Token, Mint};
+use anchor_spl::{
+    token::{TokenAccount, Token, Mint},
+    associated_token::AssociatedToken, // Import AssociatedToken
+};
 
 pub fn create_campaign(
     ctx: Context<CreateCampaign>,
@@ -51,11 +54,10 @@ pub struct CreateCampaign<'info> {
     pub campaign: Account<'info, Campaign>,
 
     #[account(
-        init,
+        init_if_needed, // Use init_if_needed for ATA
         payer = creator,
-        token::mint = mint,
-        token::authority = campaign, // PDA is the authority
-        token::token_program = token_program,
+        associated_token::mint = mint, // Specify mint for ATA
+        associated_token::authority = campaign, // PDA is the authority
     )]
     pub service_provider_token_account: Account<'info, TokenAccount>,
     #[account(mut)]
@@ -67,5 +69,6 @@ pub struct CreateCampaign<'info> {
     // Programs required
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>, // Add Associated Token Program
     pub rent: Sysvar<'info, Rent>, // Rent is needed for init if not using zero-copy
-} 
+}
