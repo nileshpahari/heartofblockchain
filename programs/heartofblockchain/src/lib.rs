@@ -1,17 +1,10 @@
 use anchor_lang::prelude::*;
-use anchor_spl::{
-    associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount, Transfer},
-    token_interface::{Mint as MintInterface, TokenInterface, TokenAccount as TokenAccountInterface},
-};
 
 pub mod instructions;
 pub mod state;
 pub mod error;
 
 use instructions::*;
-use state::*;
-use error::*;
 
 declare_id!("3pgACwNx4AjBnqJzoeaXH26rLG9hVKqePTuaz64KXaQR");
 

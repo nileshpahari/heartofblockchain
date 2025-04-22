@@ -52,7 +52,7 @@ pub struct Donate<'info> {
     #[account(
         mut,
         // Use constraint matching the campaign's mint field directly
-        token::mint = campaign.mint,
+        token::mint = mint,
         // PDA is the authority, address derived from seeds
         token::authority = campaign,
         token::token_program = token_program, // Specify token program
@@ -65,15 +65,13 @@ pub struct Donate<'info> {
     #[account(
         mut,
         // Ensure donor's token account is for the correct mint and owned by the donor
-        token::mint = campaign.mint,
+        token::mint = mint,
         token::authority = donor,
         token::token_program = token_program, // Specify token program
     )]
     pub donor_token_account: Account<'info, TokenAccount>,
 
     pub mint: Account<'info, Mint>,
-    // No need to pass mint separately if constrained via campaign.mint
-    // pub mint: InterfaceAccount<'info, MintInterface>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>, 

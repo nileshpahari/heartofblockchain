@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token_interface::{Mint};
 use crate::state::Campaign;
 use crate::error::CampaignError;
-use anchor_spl::token::{TokenAccount, Token};
+use anchor_spl::token::{TokenAccount, Token, Mint};
 
 pub fn create_campaign(
     ctx: Context<CreateCampaign>,
@@ -54,7 +53,6 @@ pub struct CreateCampaign<'info> {
     #[account(
         init,
         payer = creator,
-        // Using Token Interface here for broader compatibility (SPL Token & Token-2022)
         token::mint = mint,
         token::authority = campaign, // PDA is the authority
         token::token_program = token_program,
@@ -63,12 +61,11 @@ pub struct CreateCampaign<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
 
-    // Using MintInterface for broader compatibility
-    mint: InterfaceAccount<'info, Mint>,
+    // Standard SPL token mint
+    pub mint: Account<'info, Mint>,
 
     // Programs required
     pub system_program: Program<'info, System>,
-    // Use TokenInterface for broader compatibility
     pub token_program: Program<'info, Token>,
     pub rent: Sysvar<'info, Rent>, // Rent is needed for init if not using zero-copy
 } 
