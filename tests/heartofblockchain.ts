@@ -5,12 +5,9 @@ import { PublicKey, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { assert, expect } from "chai";
 import {
   createMint,
-  getOrCreateAssociatedTokenAccount,
   mintTo,
   getAccount,
-  TOKEN_PROGRAM_ID,
   createAssociatedTokenAccount,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
 describe("heartofblockchain", () => {
