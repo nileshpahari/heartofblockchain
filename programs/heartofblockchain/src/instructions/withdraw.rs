@@ -8,7 +8,7 @@ use crate::state::Campaign;
 use crate::error::CampaignError;
 
 pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
-    let campaign = &ctx.accounts.campaign;
+    let campaign = &mut ctx.accounts.campaign;
 
     // Signer check is handled by has_one constraint
     // Mint check is handled by has_one constraint
@@ -45,6 +45,10 @@ pub fn withdraw(ctx: Context<Withdraw>) -> Result<()> {
     let cpi_program = ctx.accounts.token_program.to_account_info();
     let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
     token::transfer(cpi_ctx, amount)?; // Using spl_token::transfer assuming standard SPL Token
+
+    // Reset campaign state after successful withdrawal
+    campaign.amount_donated = 0;
+    campaign.threshold_reached = false;
 
     msg!(
         "Withdrew {} from campaign {} to creator {}",
