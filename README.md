@@ -40,9 +40,10 @@ sequenceDiagram
     User->>Program: Donate
     Program->>Token: Transfer Tokens
     Program->>Campaign: Update Donation Records
-    
+
     User->>Program: Withdraw
     Program->>Campaign: Verify Owner & Target Met
+    Campaign->>Program: Validate Withdraw
     Program->>User: Transfer Funds
 ```
 
