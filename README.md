@@ -16,13 +16,13 @@ House of Blockchain operates on the Solana blockchain with the following key com
 
 ```mermaid
 graph TD
-    A[Client Application] -->|Interacts with| B[Solana Blockchain]
-    B -->|Executes| C[House of Blockchain Program]
-    C -->|Manages| D[Campaign Accounts]
-    C -->|Configures| E[Global Config]
-    F[Users] -->|Create Campaigns| C
-    F -->|Donate to Campaigns| C
-    G[Campaign Owners] -->|Withdraw Funds| C
+    A[User Interface] -->|Interacts with| B[House of Blockchain Program]
+    B -->|Manages| C[Campaign Accounts]
+    B -->|Stores| D[Global Config]
+    B -->|Handles| E[Token Transfers]
+    F[Campaign Creators] -->|Create| C
+    G[Donors] -->|Donate to| C
+    H[Campaign Owners] -->|Withdraw from| C
 ```
 
 ### Data Flow
@@ -31,20 +31,28 @@ graph TD
 sequenceDiagram
     participant User
     participant Program as House of Blockchain Program
+    participant Config as Global Config
     participant Campaign as Campaign Account
     participant Token as Token Account
+    participant DonorPDA as Donor PDA
 
     User->>Program: Create Campaign
+    Program->>Config: Verify Admin
     Program->>Campaign: Initialize Account
     
     User->>Program: Donate
+    Program->>Campaign: Verify Campaign Active
+    Program->>Program: Create Donor PDA
+    Program->>DonorPDA: Initialize Account
     Program->>Token: Transfer Tokens
     Program->>Campaign: Update Donation Records
+    Program->>DonorPDA: Record Donation
 
     User->>Program: Withdraw
-    Program->>Campaign: Verify Owner & Target Met
+    Program->>Campaign: Verify Owner
+    Program->>Campaign: Check Target Reached
     Campaign->>Program: Validate Withdraw
-    Program->>User: Transfer Funds
+    Program->>Token: Transfer Funds to Owner
 ```
 
 ## Project Structure
