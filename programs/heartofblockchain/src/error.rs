@@ -4,6 +4,8 @@ use anchor_lang::prelude::*;
 pub enum CampaignError {
     #[msg("Invalid mint provided.")]
     InvalidMint,
+    #[msg("Invalid mint decimals.")]
+    InvalidMintDecimals,
     #[msg("Unauthorized: Signer is not the campaign creator.")]
     Unauthorized,
     #[msg("Campaign threshold has not been reached yet.")]
@@ -28,4 +30,12 @@ pub enum CampaignError {
     TargetAmountMustBePositive,
     #[msg("Donation amount must be greater than zero.")]
     DonationAmountMustBePositive,
+    #[msg("Invalid token account owner.")]
+    InvalidTokenAccountOwner,
+    #[msg("Invalid system program.")]
+    InvalidSystemProgram,
+    #[msg("Invalid token program.")]
+    InvalidTokenProgram,
+    #[msg("Invalid associated token program.")]
+    InvalidAssociatedTokenProgram,
 } 

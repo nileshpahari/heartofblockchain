@@ -45,8 +45,6 @@ pub struct CreateCampaign<'info> {
     #[account(
         init,
         payer = creator,
-        // Use init_space for automatic calculation based on struct fields
-        // Add space for variable length fields like String if needed, otherwise Anchor calculates based on initial state
         space = 8 + Campaign::INIT_SPACE + name.len() + description.len(), // Add max expected lengths if they can grow, or use realloc later
         seeds = [b"campaign".as_ref(), creator.key().as_ref(), name.as_bytes()],
         bump
