@@ -86,7 +86,7 @@ sequenceDiagram
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/calc1f4r/heartofblockchain
+   git clone https://github.com/HOBPulse/heartofblockchain
    cd heartofblockchain
    ```
 
