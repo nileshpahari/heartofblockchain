@@ -9,7 +9,7 @@ import {
 
 const program = getReadonlyProvider();
 
-// GET /api/campaingns - Get campaign by name and creator
+// GET /api/campaigns - Get campaign by name and creator
 export async function GET(req: NextRequest) {
   try {
     const name = req.nextUrl.searchParams.get("name");
