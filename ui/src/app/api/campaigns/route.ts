@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PublicKey } from "@solana/web3.js";
 import db from "@/db/index";
 
 import {
