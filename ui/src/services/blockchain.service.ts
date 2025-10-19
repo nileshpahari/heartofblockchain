@@ -146,11 +146,16 @@ export const fetchCampaignByAddress = async (
   program: Program<Heartofblockchain>,
   address: string
 ): Promise<CampaignAccount | null> => {
-  const campaign = await program.account.campaign.fetch(address);
-  return {
-    ...campaign,
-    publicKey: new PublicKey(address),
-  };
+  try {
+    const campaign = await program.account.campaign.fetch(address);
+    return {
+      ...campaign,
+      publicKey: new PublicKey(address),
+    };
+  } catch (error) {
+    // If the account does not exist, return null
+    return null;
+  }
 };
 
 // instruction fns
