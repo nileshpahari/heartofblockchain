@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         creator: creator_public_key,
         name,
         description,
-        target_amount,
+        target_amount: BigInt(target_amount),
         mint_address,
       },
     });
